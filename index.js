@@ -4,18 +4,21 @@ var request=require("tedious").Request;
 var config={
   userName:"sa",
   password:"123",
-  server:"DESKTOP-81ANGD2\\SQLEXPRESS",
-  options: {
-    instanceName: 'MSSQLSERVER',
-    database: 'Proposal',  //the username above should have granted permissions in order to access this DB.
-    debug: {
-      packet: false,
-      payload: false,
-      token: false,
-      data: false
-    },
-    //encrypt: true
-  }
+  server:"localhost",
+  // database: 'Proposal',
+  // instanceName: 'SQLEXPRESS',
+  // port:1433
+  // // options: {
+  //   instanceName: 'MSSQLSERVER',
+  //   database: 'Proposal',  //the username above should have granted permissions in order to access this DB.
+  //   debug: {
+  //     packet: false,
+  //     payload: false,
+  //     token: false,
+  //     data: false
+  //   },
+  //   //encrypt: true
+  // }
 };
 var connection=new Connection(config);
 connection.on("connect",function (err) {
@@ -29,8 +32,8 @@ connection.on("connect",function (err) {
 const app=express();
 
 app.get("/",function (req,res) {
-  var query=connection.query();
-  res.send(query);
+  //var query=connection.query();
+  res.send("Sample Responce");
 });
 app.listen(3000,function () {
   console.log("App is listening at port 3000");
