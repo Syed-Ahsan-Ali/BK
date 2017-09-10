@@ -38,11 +38,6 @@ function getTags(callback){
       process.setMaxListeners(0);
       request.on("row", function (columns) {
         newdata.push({Id:columns[0].value,screenName:columns[1].value});
-        //console.log(JSON.stringify(columns));
-        // columns.forEach(function (column) {
-        //   //console.log(JSON.stringify(column));
-        //   newdata.push({val:column.value});
-        // });
       });
       request.on("done",function (rowCount,more) {
         console.log(rowCount+"rows Returned")
@@ -50,8 +45,40 @@ function getTags(callback){
       connection.execSql(request);
     }
   });
-
-
+}
+function getDescById(callback) {
+  var connection=new Connection(config);
+  var descData=[];
+  connection.on("connect",function (err) {
+    if(err)
+    {
+      console.log(err);
+    }
+    else
+    {
+      var request=new Request("select d.screenText from Description as d\n" +
+        "\tinner join tagDescription as td on d.Id=td.descriptionId\n" +
+        "\tinner join tags as t on t.Id=td.tagId\n" +
+        "\twhere t.Id=28\n" +
+        "\t",function (err,rowCount) {
+        if(err)
+        {
+          callback(err);
+        }
+        else if(rowCount<1)
+        {
+          callback(null,false);
+        }
+        else {
+          callback(null,descData);
+        }
+      });
+      request.on("row",function (columns) {
+        descData.push({screenText:columns[0].value});
+      });
+      connection.execSql(request);
+    }
+  })
 }
 const app=express();
 app.get("/tags",function (req,res) {
@@ -67,6 +94,23 @@ app.get("/tags",function (req,res) {
   });
 
 });
+app.get("/tags/:id",function (req,res) {
+  getDescById(function (err,rows) {
+    if(err)
+    {
+      console.log(err);
+    }
+    else if(rows)
+    {
+      res.send(rows)
+    }
+    else{
+      console.log("No Data Available");
+    }
+  })
+});
+
+
 app.listen(3000,function () {
   console.log("App is listening at port 3000");
 });
