@@ -46,7 +46,7 @@ function getTags(callback){
     }
   });
 }
-function getDescById(callback) {
+function getDescById(Id,callback) {
   var connection=new Connection(config);
   var descData=[];
   connection.on("connect",function (err) {
@@ -59,7 +59,7 @@ function getDescById(callback) {
       var request=new Request("select d.screenText from Description as d\n" +
         "\tinner join tagDescription as td on d.Id=td.descriptionId\n" +
         "\tinner join tags as t on t.Id=td.tagId\n" +
-        "\twhere t.Id=28\n" +
+        "\twhere t.Id="+Id+"\n" +
         "\t",function (err,rowCount) {
         if(err)
         {
@@ -84,28 +84,29 @@ const app=express();
 app.get("/tags",function (req,res) {
   getTags(function(err,rows){
   if(err){
-    console.log(err);
+    res.send(err);
   }
   else if(rows){
     res.send(rows);  }
   else{
-    console.log("No Data Available");
+    res.send("No Data Available");
   }
   });
 
 });
-app.get("/tags/:id",function (req,res) {
-  getDescById(function (err,rows) {
+app.get("/tags/:Id",function (req,res) {
+  var Id=req.params.Id;
+  getDescById(Id,function (err,rows) {
     if(err)
     {
-      console.log(err);
+      res.send(err);
     }
     else if(rows)
     {
       res.send(rows)
     }
     else{
-      console.log("No Data Available");
+      res.send("No Data Available");
     }
   })
 });
