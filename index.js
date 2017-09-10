@@ -80,6 +80,36 @@ function getDescById(Id,callback) {
     }
   })
 }
+function getDescByType(type,callback) {
+  var connection=new Connection(config);
+  var descData=[];
+  connection.on("connect",function (err) {
+    if(err)
+    {
+      console.log(err);
+    }
+    else
+    {
+      var request=new Request("select d.screenText from Description as d where d.type='"+type+"'",function (err,rowCount) {
+        if(err)
+        {
+          callback(err);
+        }
+        else if(rowCount<1)
+        {
+          callback(null,false);
+        }
+        else {
+          callback(null,descData);
+        }
+      });
+      request.on("row",function (columns) {
+        descData.push({screenText:columns[0].value});
+      });
+      connection.execSql(request);
+    }
+  })
+}
 const app=express();
 app.get("/tags",function (req,res) {
   getTags(function(err,rows){
@@ -110,7 +140,20 @@ app.get("/tags/:Id",function (req,res) {
     }
   })
 });
-
+app.get("/tags/type/:type",function (req,res) {
+  var type=req.params.type;
+  getDescByType(type,function (err,rows) {
+    if(err){
+      res.send(err);
+    }
+    else if(rows){
+      res.send(rows);
+    }
+    else{
+      res.send("No Data Available")
+    }
+  })
+});
 
 app.listen(3000,function () {
   console.log("App is listening at port 3000");
