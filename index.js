@@ -15,6 +15,7 @@ var Request=require("tedious").Request;
 function getTags(callback){
   var connection=new Connection(config);
   var newdata=[];
+  var data={};
   connection.on("connect",function (err) {
     if(err) {
       console.log("Not Connected"+err);
@@ -31,7 +32,7 @@ function getTags(callback){
             callback(null,false);
           }
           else{
-            callback(null,newdata);
+            callback(null,data);
           }
         }
       });
@@ -39,6 +40,7 @@ function getTags(callback){
       request.on("row", function (columns) {
         newdata.push({Id:columns[0].value,screenName:columns[1].value});
       });
+      data.data=newdata;
       request.on("done",function (rowCount,more) {
         console.log(rowCount+"rows Returned")
       });
@@ -48,6 +50,7 @@ function getTags(callback){
 }
 function getDescById(Id,callback) {
   var connection=new Connection(config);
+  var data={};
   var descData=[];
   connection.on("connect",function (err) {
     if(err)
@@ -56,7 +59,7 @@ function getDescById(Id,callback) {
     }
     else
     {
-      var request=new Request("select d.screenText from Description as d\n" +
+      var request=new Request("select d.screenText,d.type from Description as d\n" +
         "\tinner join tagDescription as td on d.Id=td.descriptionId\n" +
         "\tinner join tags as t on t.Id=td.tagId\n" +
         "\twhere t.Id="+Id+"\n" +
@@ -70,12 +73,13 @@ function getDescById(Id,callback) {
           callback(null,false);
         }
         else {
-          callback(null,descData);
+          callback(null,data);
         }
       });
       request.on("row",function (columns) {
-        descData.push({screenText:columns[0].value});
+        descData.push({screenText:columns[0].value,type:columns[1].value});
       });
+      data.description=descData;
       connection.execSql(request);
     }
   })
@@ -202,7 +206,12 @@ app.get("/tags/:Id/:type",function (req,res) {
     }
   })
 });
-
+app.post("/tags/postRecords/:data",function (req,res) {
+  res.send("Get a post Request");
+});
+app.delete("tags/deleteRecords/:Id",function (req,res) {
+  res.send("Get a Delete Request");
+});
 app.listen(3000,function () {
   console.log("App is listening at port 3000");
 });
