@@ -38,7 +38,7 @@ function getTags(callback){
       });
       process.setMaxListeners(0);
       request.on("row", function (columns) {
-        newdata.push({Id:columns[0].value,screenName:columns[1].value});
+        newdata.push({Id:columns[0].value,screenName:columns[1].value,check:false});
       });
       data.data=newdata;
       request.on("done",function (rowCount,more) {
